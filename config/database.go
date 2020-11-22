@@ -31,7 +31,7 @@ func (d Database) Host() string {
 
 // Port database config
 func (d Database) Port() string {
-	if env := os.Getenv("DATABASE_POST"); env != "" {
+	if env := os.Getenv("DATABASE_PORT"); env != "" {
 		return env
 	}
 	return "3306"
