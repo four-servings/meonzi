@@ -1,7 +1,7 @@
 package setup
 
 import (
-	"github/four-servings/dropit-backend/config"
+	"github/four-servings/meonzi/config"
 	"log"
 	"os"
 	"time"
