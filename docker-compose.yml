@@ -1,6 +1,55 @@
 version: "3.8"
 
 services:
+  traefik:
+    image: traefik
+    restart: always
+    # labels: 
+      # middleware redirect
+      # - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https" # declare middleware called redirect-to-https
+
+      # global redirect to https
+      # - "traefik.http.routers.redirs.rule=hostregexp(`{host:.+}`)"               # redirect router what match regex globally
+      # - "traefik.http.routers.redirs.entrypoints=web"                            # catch and redirect on entry point web
+      # - "traefik.http.routers.redirs.middlewares=redirect-to-https"              # add redirect middleware called redirect-to-https
+
+      # Dashboard secure
+      # - "traefik.http.routers.traefik.rule=Host(`api.localhost.com`)"            # rule for route to traefik ex) api.example.com
+      # - "traefik.http.routers.traefik.service=api@internal"                      # route given service name  ex) api@internal
+      # - "traefik.http.routers.traefik.middlewares=admin"                         # use given middleware      ex) admin
+      # - "traefik.http.routers.traefik.tls.certresolver=le"                       # use given cert resolver   ex) le
+      # - "traefik.http.routers.traefik.entrypoints=websecure"                     # use given entry point     ex) websecure
+      # - "traefik.http.middlewares.admin.basicauth.users=admin:xxx"               # declare middleware called admin
+    command:           
+      - --entrypoints.web.address=:80                                              # http entry point
+      # - --entrypoints.websecure.address=:443                                     # https entry point
+      - --providers.docker                                                         # enable docker provider
+      - --api.insecure                                                             # enable insecure dashboard
+      # - --api                                                                    # enable secure dashboard
+
+      # certificate let's encrypt
+      # - --certificatesresolvers.le.acme.email=${EMAIL}
+      # - --certificatesresolvers.le.acme.storage=/acme.json
+      # - --certificatesresolvers.le.acme.tlschallenge=true
+    ports: 
+      - "80:80"                                                                    # http port forwarding
+      # - "443:443"                                                                # https port forwarding
+      - "8080:8080"                                                                # dashboard port forwarding
+    volumes: 
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      # - ./acme.json:/acme.json"
+
+  meonzi:
+    build: .
+    restart: always
+    labels: 
+      # - "traefik.http.routers.meonzi.tls.certresolver=le"                        # use given cert resolver ex) le
+      # - "traefik.http.routers.meonzi.tls=true"
+      - "traefik.http.routers.meonzi.rule=Host(`localhost`)"                       # host routing rule from external
+      - "traefik.http.services.meonzi.loadbalancer.server.port=5000"               # load balance to port 5000 when meonzi requested
+    environment: 
+      - DATABASE_HOST=database
+
   database:
     image: mysql:5.7
     restart: always
