@@ -7,11 +7,9 @@ import (
 	"gorm.io/gorm"
 )
 
-type (
-	accountRepositoryImplement struct {
-		db *gorm.DB
-	}
-)
+type accountRepositoryImplement struct {
+	db *gorm.DB
+}
 
 // NewRepository create repository instance
 func NewRepository(db *gorm.DB) domain.AccountRepository {
