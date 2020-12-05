@@ -32,6 +32,13 @@ type (
 		UpdatedAt      time.Time
 		DeletedAt      *time.Time
 	}
+
+	// AccountRepository account repository
+	AccountRepository interface {
+		Save(account Account)
+		FindNewID() string
+		FindByID(id string) Account
+	}
 )
 
 // NewAccount create account instance

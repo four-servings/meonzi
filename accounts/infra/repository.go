@@ -8,20 +8,13 @@ import (
 )
 
 type (
-	// AccountRepository account repository interface
-	AccountRepository interface {
-		Save(account domain.Account)
-		FindNewID() string
-		FindByID(id string) domain.Account
-	}
-
 	accountRepositoryImplement struct {
 		db *gorm.DB
 	}
 )
 
 // NewRepository create repository instance
-func NewRepository(db *gorm.DB) AccountRepository {
+func NewRepository(db *gorm.DB) domain.AccountRepository {
 	err := db.AutoMigrate(&Account{})
 	if err != nil {
 		panic(err)

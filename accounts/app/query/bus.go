@@ -2,7 +2,7 @@ package query
 
 import (
 	"errors"
-	"github/four-servings/meonzi/accounts/infra"
+	"github/four-servings/meonzi/accounts/domain"
 )
 
 type (
@@ -17,7 +17,7 @@ type (
 )
 
 // NewBus create bus instance
-func NewBus(repository infra.AccountRepository) Bus {
+func NewBus(repository domain.AccountRepository) Bus {
 	findByIDHandler := newFindByIDHandler(repository)
 	return &busImplement{findByIDHandler}
 }

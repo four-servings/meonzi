@@ -2,7 +2,7 @@ package command
 
 import (
 	"errors"
-	"github/four-servings/meonzi/accounts/infra"
+	"github/four-servings/meonzi/accounts/domain"
 )
 
 type (
@@ -18,7 +18,7 @@ type (
 )
 
 // NewBus create command bus instance
-func NewBus(repository infra.AccountRepository) Bus {
+func NewBus(repository domain.AccountRepository) Bus {
 	createAccountHandler := newCreateAccountHandler(repository)
 	return &bustImplement{createAccountHandler}
 }

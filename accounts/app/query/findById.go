@@ -2,7 +2,7 @@ package query
 
 import (
 	"errors"
-	"github/four-servings/meonzi/accounts/infra"
+	"github/four-servings/meonzi/accounts/domain"
 	"time"
 )
 
@@ -27,11 +27,11 @@ type (
 	}
 
 	findByIDHandlerImplement struct {
-		repository infra.AccountRepository
+		repository domain.AccountRepository
 	}
 )
 
-func newFindByIDHandler(repository infra.AccountRepository) findByIDHandler {
+func newFindByIDHandler(repository domain.AccountRepository) findByIDHandler {
 	return &findByIDHandlerImplement{repository}
 }
 

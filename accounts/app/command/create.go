@@ -2,7 +2,6 @@ package command
 
 import (
 	"github/four-servings/meonzi/accounts/domain"
-	"github/four-servings/meonzi/accounts/infra"
 )
 
 type (
@@ -16,11 +15,11 @@ type (
 	}
 
 	createAccountHandlerImplement struct {
-		repository infra.AccountRepository
+		repository domain.AccountRepository
 	}
 )
 
-func newCreateAccountHandler(repository infra.AccountRepository) createAccountHandler {
+func newCreateAccountHandler(repository domain.AccountRepository) createAccountHandler {
 	return &createAccountHandlerImplement{repository}
 }
 
