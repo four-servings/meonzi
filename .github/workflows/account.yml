@@ -1,0 +1,29 @@
+name: accounts module test
+
+on: 
+  push:
+    paths:
+      - accounts/**
+      - .github/workflows/account.yml
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  test:
+    defaults:
+      run:
+        working-directory: ./accounts
+    strategy:
+      matrix:
+        go-version: [1.15.x]
+        platform: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.platform }}
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v2
+    - name: Install Go
+      uses: actions/setup-go@v1
+      with:
+        go-version: ${{ matrix.go-version }}
+    - name: Test
+      run: go test ./... -count=1
