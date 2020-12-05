@@ -2,7 +2,6 @@ package query
 
 import (
 	"errors"
-	"github/four-servings/meonzi/account/domain"
 )
 
 type (
@@ -13,13 +12,15 @@ type (
 
 	busImplement struct {
 		findByIDHandler findByIDHandler
+		findHandler     findHandler
 	}
 )
 
 // NewBus create bus instance
-func NewBus(repository domain.AccountRepository) Bus {
-	findByIDHandler := newFindByIDHandler(repository)
-	return &busImplement{findByIDHandler}
+func NewBus(query AccountQuery) Bus {
+	findByIDHandler := newFindByIDHandler(query)
+	findHandler := newFindHandler(query)
+	return &busImplement{findByIDHandler, findHandler}
 }
 
 // Handle handle given query
@@ -27,6 +28,8 @@ func (b *busImplement) Handle(givenQuery interface{}) interface{} {
 	switch givenQuery := givenQuery.(type) {
 	case *FindByID:
 		return b.findByIDHandler.handle(givenQuery)
+	case *Find:
+		return b.findHandler.handle(givenQuery)
 	default:
 		panic(errors.New("invalid query"))
 	}
