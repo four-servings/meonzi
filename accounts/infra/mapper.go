@@ -9,6 +9,13 @@ func EntityFromModel(model domain.Account) Account {
 
 // ModelFromEntity create model from entity
 func ModelFromEntity(entity Account) domain.Account {
-	anemic := domain.AnemicAccount{entity.ID, entity.Name, entity.LastAccessedAt, entity.CreatedAt, entity.UpdatedAt, entity.DeletedAt}
+	anemic := domain.AnemicAccount{
+		ID:             entity.ID,
+		Name:           entity.Name,
+		LastAccessedAt: entity.LastAccessedAt,
+		CreatedAt:      entity.CreatedAt,
+		UpdatedAt:      entity.UpdatedAt,
+		DeletedAt:      entity.DeletedAt,
+	}
 	return anemic.ToRichModel()
 }
