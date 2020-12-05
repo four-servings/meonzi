@@ -1,3 +1,6 @@
 Dockerfile
 *compose.yml
 .env
+.aws
+.github
+.gitignore
