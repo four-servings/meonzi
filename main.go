@@ -1,7 +1,7 @@
 package main
 
 import (
-	_ "github/four-servings/meonzi/accounts"
+	_ "github/four-servings/meonzi/account"
 	"log"
 	"net/http"
 )

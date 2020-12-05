@@ -2,7 +2,7 @@ package api
 
 import (
 	"encoding/json"
-	"github/four-servings/meonzi/accounts/app/command"
+	"github/four-servings/meonzi/account/app/command"
 	"net/http"
 )
 

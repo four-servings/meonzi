@@ -1,6 +1,6 @@
 package infra
 
-import "github/four-servings/meonzi/accounts/domain"
+import "github/four-servings/meonzi/account/domain"
 
 // EntityFromModel create entity from model
 func EntityFromModel(model domain.Account) Account {

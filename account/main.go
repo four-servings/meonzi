@@ -1,9 +1,9 @@
-package accounts
+package account
 
 import (
-	"github/four-servings/meonzi/accounts/api"
-	"github/four-servings/meonzi/accounts/app/command"
-	"github/four-servings/meonzi/accounts/infra"
+	"github/four-servings/meonzi/account/api"
+	"github/four-servings/meonzi/account/app/command"
+	"github/four-servings/meonzi/account/infra"
 	"github/four-servings/meonzi/setup"
 	"net/http"
 )

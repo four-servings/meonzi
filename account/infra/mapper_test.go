@@ -1,7 +1,7 @@
 package infra
 
 import (
-	"github/four-servings/meonzi/accounts/domain"
+	"github/four-servings/meonzi/account/domain"
 	"testing"
 )
 
