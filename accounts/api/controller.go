@@ -52,7 +52,7 @@ func (c *controllerImplement) handlePOST(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	c.commandBus.Handle(&command.CreateAccount{body.Name})
+	c.commandBus.Handle(&command.CreateAccount{Name: body.Name})
 	w.WriteHeader(http.StatusCreated)
 }
 
