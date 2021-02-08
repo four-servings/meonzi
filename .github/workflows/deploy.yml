@@ -5,6 +5,7 @@ on:
       - master
 jobs:
   test:
+    name: Run test
     strategy:
       matrix:
         go-version: [1.14.x, 1.15.x]
@@ -20,6 +21,8 @@ jobs:
     - name: Test
       run: go test ./... -count=1
   build:
+    name: Build application
+    runs-on: ubuntu-latest
     steps:
     - name: Install Go
       uses: actions/setup-go@v2
