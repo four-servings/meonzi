@@ -34,7 +34,7 @@ jobs:
     - name: Compress build output
       run: zpi -qq -r ./$GITHUB_SHA.zip .
     - name: Config AWS credentials
-      use: aws-actions/configure-aws-credentials@v1
+      uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: $
         aws-secret-access-key: $
