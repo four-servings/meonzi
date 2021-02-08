@@ -21,7 +21,7 @@ jobs:
     - name: Test
       run: go test ./... -count=1
   deploy:
-    name: Build application
+    name: Deploy application
     runs-on: ubuntu-latest
     needs: test
     steps:
@@ -29,10 +29,10 @@ jobs:
       uses: actions/setup-go@v2
     - name: Checkout Code
       uses: actions/checkout@v2
-    - name: Build
+    - name: Build application
       run: GOOS=linux GOARCH=amd64 go build -o meonzi
-    - name: Compress build output
-      run: zpi -qq -r ./$GITHUB_SHA.zip .
+    - name: Compress bundle
+      run: zip -qq -r ./$GITHUB_SHA.zip .
     - name: Config AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
