@@ -1,4 +1,4 @@
-name: account module test
+name: deploy workflows
 on: 
   push:
     branches:
@@ -19,3 +19,11 @@ jobs:
       uses: actions/checkout@v2
     - name: Test
       run: go test ./... -count=1
+  build:
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v2
+    - name: Checkout Code
+      uses: actions/checkout@v2
+    - name: Build
+      run: GOOS=linux GOARCH=amd64 go build -o meonzi
