@@ -3,16 +3,17 @@
 package main
 
 import (
-	"github.com/google/wire"
 	"github/four-servings/meonzi/account/domain"
 	"github/four-servings/meonzi/account/infrastructure"
+	"github/four-servings/meonzi/config"
 	"github/four-servings/meonzi/di"
-)
 
+	"github.com/google/wire"
+)
 
 func exampleGetAccountRepository() domain.AccountRepository {
 	wire.Build(
-		di.ConfigSets,
+		config.ConfigSets,
 		di.ProviderSets,
 		infrastructure.NewAccountRepository,
 	)

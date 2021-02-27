@@ -2,11 +2,11 @@ package di
 
 import (
 	"context"
+	"github/four-servings/meonzi/account/infrastructure"
+	"github/four-servings/meonzi/ent"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/google/wire"
-	"github/four-servings/meonzi/account/infrastructure"
-	"github/four-servings/meonzi/config"
-	"github/four-servings/meonzi/ent"
 )
 
 func ProviderDatabase(conn DBConn) *ent.Client {
@@ -25,19 +25,13 @@ func ProviderAccountTable(cli *ent.Client) *ent.AccountClient {
 	return cli.Account
 }
 
-// config
-var ConfigSets = wire.NewSet(
-	config.GetDBConn,
-	)
-
 // providers
 var ProviderSets = wire.NewSet(
 	ProviderDatabase,
 	ProviderAccountTable,
-	)
+)
 
 // repositories
 var RepositorySets = wire.NewSet(
 	infrastructure.NewAccountRepository,
-	)
-
+)

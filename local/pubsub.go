@@ -6,8 +6,6 @@ import (
 	"sync"
 )
 
-
-
 type PubSub interface {
 	Publish(value interface{})
 	Subscribe(handler interface{}) error
@@ -15,7 +13,7 @@ type PubSub interface {
 
 //TODO exists check
 type subs struct {
-	lock sync.RWMutex
+	lock    sync.RWMutex
 	handler []interface{}
 }
 
@@ -35,7 +33,7 @@ func (s *subs) append(handler interface{}) {
 }
 
 type values struct {
-	lock sync.RWMutex
+	lock  sync.RWMutex
 	value []interface{}
 }
 
@@ -62,10 +60,17 @@ func (v *values) count() (cnt int) {
 // TODO max value count
 type pubsubImpl struct {
 	valueLock sync.RWMutex
-	value map[reflect.Type]*values
+	value     map[reflect.Type]*values
 
 	subLock sync.RWMutex
-	sub map[reflect.Type]*subs
+	sub     map[reflect.Type]*subs
+}
+
+func NewPubSub() PubSub {
+	return &pubsubImpl{
+		value: make(map[reflect.Type]*values),
+		sub:   make(map[reflect.Type]*subs),
+	}
 }
 
 func (ps *pubsubImpl) Publish(value interface{}) {
@@ -140,7 +145,6 @@ func (ps *pubsubImpl) createSubs(typ reflect.Type) (res *subs) {
 	ps.sub[typ] = res
 	return
 }
-
 
 func (ps *pubsubImpl) appendValue(value interface{}) {
 	typ := reflect.TypeOf(value)

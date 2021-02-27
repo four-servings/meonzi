@@ -10,7 +10,7 @@ import (
 
 var (
 	contextType = reflect.TypeOf(new(context.Context)).Elem()
-	errorType = reflect.TypeOf(new(error)).Elem()
+	errorType   = reflect.TypeOf(new(error)).Elem()
 )
 
 type BusHandlerFunc func(ctx context.Context, value interface{}) error
@@ -27,7 +27,7 @@ type Bus interface {
 }
 
 type busImpl struct {
-	lock sync.RWMutex
+	lock    sync.RWMutex
 	gateway map[reflect.Type]BusHandlerFunc
 	timeout *time.Duration
 }
@@ -55,6 +55,11 @@ func (b *busImpl) RegistryHandler(targetType interface{}, handler interface{}) e
 	actionType := action.Type()
 	inCount := actionType.NumIn()
 	outCount := actionType.NumOut()
+
+	if action.Kind() != reflect.Func {
+		//TODO error message
+		return errors.New("")
+	}
 
 	if inCount > 2 {
 		return errors.New("handler call arguments count overflow")
