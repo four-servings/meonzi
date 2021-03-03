@@ -42,11 +42,6 @@ func (*authApi) GetByIdToken(ctx context.Context, idToken string) (res TokenInfo
 	}
 
 	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		err = Error{}
-
-	}
-
 	decoder := json.NewDecoder(resp.Body)
 
 	switch resp.StatusCode {
