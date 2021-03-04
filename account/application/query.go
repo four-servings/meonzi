@@ -12,7 +12,4 @@ type (
 )
 
 
-func (h *FindByIDHandler) handle(query FindByID) interface{} {
-	retrun h.query.FindByID(query.ID)
-}
 

@@ -4,6 +4,8 @@ package account
 
 import (
 	"time"
+
+	"github.com/google/uuid"
 )
 
 const (
@@ -63,4 +65,6 @@ var (
 	DefaultUpdateAt func() time.Time
 	// UpdateDefaultUpdateAt holds the default value on update for the "update_at" field.
 	UpdateDefaultUpdateAt func() time.Time
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() uuid.UUID
 )

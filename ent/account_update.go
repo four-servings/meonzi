@@ -33,6 +33,20 @@ func (au *AccountUpdate) SetName(s string) *AccountUpdate {
 	return au
 }
 
+// SetNillableName sets the "name" field if the given value is not nil.
+func (au *AccountUpdate) SetNillableName(s *string) *AccountUpdate {
+	if s != nil {
+		au.SetName(*s)
+	}
+	return au
+}
+
+// ClearName clears the value of the "name" field.
+func (au *AccountUpdate) ClearName() *AccountUpdate {
+	au.mutation.ClearName()
+	return au
+}
+
 // SetLastAccessedAt sets the "last_accessed_at" field.
 func (au *AccountUpdate) SetLastAccessedAt(t time.Time) *AccountUpdate {
 	au.mutation.SetLastAccessedAt(t)
@@ -171,6 +185,12 @@ func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: account.FieldName,
 		})
 	}
+	if au.mutation.NameCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: account.FieldName,
+		})
+	}
 	if value, ok := au.mutation.LastAccessedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -219,6 +239,20 @@ type AccountUpdateOne struct {
 // SetName sets the "name" field.
 func (auo *AccountUpdateOne) SetName(s string) *AccountUpdateOne {
 	auo.mutation.SetName(s)
+	return auo
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (auo *AccountUpdateOne) SetNillableName(s *string) *AccountUpdateOne {
+	if s != nil {
+		auo.SetName(*s)
+	}
+	return auo
+}
+
+// ClearName clears the value of the "name" field.
+func (auo *AccountUpdateOne) ClearName() *AccountUpdateOne {
+	auo.mutation.ClearName()
 	return auo
 }
 
@@ -362,6 +396,12 @@ func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err e
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
+			Column: account.FieldName,
+		})
+	}
+	if auo.mutation.NameCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
 			Column: account.FieldName,
 		})
 	}

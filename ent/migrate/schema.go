@@ -13,7 +13,7 @@ var (
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "social_type", Type: field.TypeUint8},
 		{Name: "social_id", Type: field.TypeString, Size: 30},
-		{Name: "name", Type: field.TypeString, Size: 30},
+		{Name: "name", Type: field.TypeString, Nullable: true, Size: 30},
 		{Name: "last_accessed_at", Type: field.TypeTime},
 		{Name: "create_at", Type: field.TypeTime},
 		{Name: "update_at", Type: field.TypeTime},

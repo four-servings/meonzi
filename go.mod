@@ -5,6 +5,7 @@ go 1.15
 require (
 	entgo.io/ent v0.6.0
 	github.com/caarlos0/env/v6 v6.5.0
+	github.com/gin-gonic/gin v1.6.3 // indirect
 	github.com/go-sql-driver/mysql v1.5.1-0.20200311113236-681ffa848bae
 	github.com/google/uuid v1.2.0
 	github.com/google/wire v0.5.0

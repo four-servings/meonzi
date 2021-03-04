@@ -255,9 +255,22 @@ func (m *AccountMutation) OldName(ctx context.Context) (v string, err error) {
 	return oldValue.Name, nil
 }
 
+// ClearName clears the value of the "name" field.
+func (m *AccountMutation) ClearName() {
+	m.name = nil
+	m.clearedFields[account.FieldName] = struct{}{}
+}
+
+// NameCleared returns if the "name" field was cleared in this mutation.
+func (m *AccountMutation) NameCleared() bool {
+	_, ok := m.clearedFields[account.FieldName]
+	return ok
+}
+
 // ResetName resets all changes to the "name" field.
 func (m *AccountMutation) ResetName() {
 	m.name = nil
+	delete(m.clearedFields, account.FieldName)
 }
 
 // SetLastAccessedAt sets the "last_accessed_at" field.
@@ -601,6 +614,9 @@ func (m *AccountMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *AccountMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(account.FieldName) {
+		fields = append(fields, account.FieldName)
+	}
 	if m.FieldCleared(account.FieldDeleteAt) {
 		fields = append(fields, account.FieldDeleteAt)
 	}
@@ -618,6 +634,9 @@ func (m *AccountMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *AccountMutation) ClearField(name string) error {
 	switch name {
+	case account.FieldName:
+		m.ClearName()
+		return nil
 	case account.FieldDeleteAt:
 		m.ClearDeleteAt()
 		return nil

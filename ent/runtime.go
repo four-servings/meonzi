@@ -6,6 +6,8 @@ import (
 	"github/four-servings/meonzi/ent/account"
 	"github/four-servings/meonzi/ent/schema"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -32,4 +34,8 @@ func init() {
 	account.DefaultUpdateAt = accountDescUpdateAt.Default.(func() time.Time)
 	// account.UpdateDefaultUpdateAt holds the default value on update for the update_at field.
 	account.UpdateDefaultUpdateAt = accountDescUpdateAt.UpdateDefault.(func() time.Time)
+	// accountDescID is the schema descriptor for id field.
+	accountDescID := accountFields[0].Descriptor()
+	// account.DefaultID holds the default value on creation for the id field.
+	account.DefaultID = accountDescID.Default.(func() uuid.UUID)
 }

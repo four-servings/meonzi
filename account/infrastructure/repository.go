@@ -20,6 +20,19 @@ func NewAccountRepository(cli *ent.AccountClient) domain.AccountRepository {
 	return &repo{cli}
 }
 
+func (r *repo) FindNewId(ctx context.Context, typ schema.SocialType, id string) (newId uuid.UUID, err error) {
+	res, err := r.cli.Create().
+		SetSocialType(typ).
+		SetSocialID(id).
+		Save(ctx)
+	if err != nil {
+		log.WithError(err).Error("account find new id exception")
+		return
+	}
+	newId = res.ID
+	return
+}
+
 func (r *repo) Create(ctx context.Context, data *ent.Account) (err error) {
 	res, err := r.cli.Create().
 		SetID(data.ID).
@@ -28,6 +41,7 @@ func (r *repo) Create(ctx context.Context, data *ent.Account) (err error) {
 		SetName(data.Name).
 		SetLastAccessedAt(data.LastAccessedAt).
 		Save(ctx)
+
 	if err != nil {
 		log.WithFields(log.Fields{
 			"data": data,

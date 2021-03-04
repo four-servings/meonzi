@@ -62,10 +62,10 @@ func (s *SocialType) UnmarshalJSON(data []byte) error {
 // Fields of the Account.
 func (Account) Fields() []ent.Field {
 	return []ent.Field{
-		field.UUID("id", uuid.UUID{}).Immutable(),
+		field.UUID("id", uuid.UUID{}).Default(uuid.New).Immutable(),
 		field.Uint8("social_type").GoType(SocialTypeUnknown).Immutable(),
 		field.String("social_id").MaxLen(30).Immutable(),
-		field.String("name").MaxLen(30),
+		field.String("name").MaxLen(30).Optional(),
 		field.Time("last_accessed_at"),
 		field.Time("create_at").Default(time.Now).Immutable(),
 		field.Time("update_at").Default(time.Now).UpdateDefault(time.Now),

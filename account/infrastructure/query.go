@@ -1,20 +1,25 @@
 package infrastructure
 
 import (
-	"context"
+	"github/four-servings/meonzi/ent"
 	"github/four-servings/meonzi/ent/schema"
 )
 
 type (
 	GetAccountBySocial struct {
-		Ctx        context.Context
 		SocialType schema.SocialType
 		SocialId   string
 	}
 
-	Query struct{}
+	Query interface {
+
+	}
+
+	queryImpl struct {
+		cli *ent.AccountClient
+	}
 )
 
-func (q *Query) FindByID(id string) {
+func (q *queryImpl) FindByID(id string) {
 	// SELECT t....
 }

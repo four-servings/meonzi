@@ -1,22 +1,12 @@
 package application
 
-import (
-	"github.com/google/uuid"
-	"github/four-servings/meonzi/ent"
-)
+import "github/four-servings/meonzi/local"
 
-type (
-	UserRegisteredEvent struct {
-		Id uuid.UUID
-		Account ent.Account
-	}
+type EventPublisher interface {
+	local.PubSub
+}
 
-	UserUpdatedEvent struct {
-		Id uuid.UUID
-		Account ent.Account
-	}
 
-	UserRemovedEvent struct {
-		Id uuid.UUID
-	}
-)
+func NewEventPublisher() EventPublisher {
+	return local.NewPubSub()
+}
