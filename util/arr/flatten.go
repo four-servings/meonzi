@@ -23,4 +23,3 @@ func flatten(args reflect.Value) (res []interface{}) {
 
 	return
 }
-

@@ -6,7 +6,6 @@ type EventPublisher interface {
 	local.PubSub
 }
 
-
 func NewEventPublisher() EventPublisher {
 	return local.NewPubSub()
 }

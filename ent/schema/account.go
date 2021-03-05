@@ -1,12 +1,13 @@
 package schema
 
 import (
+	"strings"
+	"time"
+
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 	"github.com/google/uuid"
-	"strings"
-	"time"
 )
 
 // Account holds the schema definition for the Account entity.
@@ -30,7 +31,7 @@ var (
 	}
 
 	socialTypeFromString = map[string]SocialType{
-		"kakao": SocialTypeKakao,
+		"kakao":  SocialTypeKakao,
 		"google": SocialTypeGoogle,
 	}
 )
@@ -44,7 +45,7 @@ func (s SocialType) String() string {
 }
 
 func (s SocialType) MarshalJSON() ([]byte, error) {
-	return []byte("\""+s.String()+"\""), nil
+	return []byte("\"" + s.String() + "\""), nil
 }
 
 func (s *SocialType) UnmarshalJSON(data []byte) error {
@@ -58,6 +59,8 @@ func (s *SocialType) UnmarshalJSON(data []byte) error {
 
 	return nil
 }
+
+// domain model, orm => database entity
 
 // Fields of the Account.
 func (Account) Fields() []ent.Field {

@@ -19,7 +19,7 @@ const (
 
 type Error struct {
 	Code ErrorCode `json:"code"`
-	Msg string `json:"msg"`
+	Msg  string    `json:"msg"`
 }
 
 func (e Error) Error() string {
@@ -75,7 +75,7 @@ type GenderType string
 
 const (
 	FemaleType GenderType = "female"
-	MaleType GenderType = "male"
+	MaleType   GenderType = "male"
 )
 
 type UserProfile struct {
@@ -91,7 +91,6 @@ type UserProfile struct {
 	// properties = 사용자가 해당 서비스에서 설정한 프로필 이미지 썸네일 URL, 기본 값은 카카오계정 썸네일 URL
 	// profile = 프로필 미리보기 이미지 URL, 110px * 110px 또는 100px * 100px
 	ThumbnailImageUrl string `json:"thumbnail_image_url"`
-
 }
 
 type UserInfo struct {
@@ -101,7 +100,6 @@ type UserInfo struct {
 
 	// 카카오계정 정보
 	KakaoAccount struct {
-
 		Profile UserProfile `json:"profile"`
 
 		// 사용자 동의 시 프로필 제공 가능

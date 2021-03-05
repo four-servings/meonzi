@@ -1,13 +1,37 @@
 package infrastructure
 
 import (
-	"github.com/gin-gonic/gin"
-	"github/four-servings/meonzi/account/application"
+	"github/four-servings/meonzi/account/interfaces"
+	"net/http"
 )
 
 type handler struct {
-	application.CommandBus
+	interfaces.Controller
 }
 
-func NewRouter(commandBus application.CommandBus) {
+func NewRouter(e *echo.Echo, controller interfaces.Controller) {
+	handler := handler{controller}
+	e := echo.New()
+	e.POST("/account", handler.registerAccount)
+}
+
+func (h *handler) registerAccount(ctx echo.Context) error {
+	var binder struct {
+		Token    string `json:"token"`
+		Provider string `json:"provider"`
+		Name     string `json:"name"`
+	}
+	err := ctx.Bind(&binder)
+	if err != nil {
+		return ctx.NoContent(http.StatusBadRequest)
+	}
+
+	ctx.Validate(binder)
+	dto := interfaces.RegisterAccountDTO{
+		Token:    binder.Token,
+		Name:     binder.Name,
+		Provider: binder.Provider,
+	}
+	h.Controller.RegisterAccount(dto)
+	return nil
 }

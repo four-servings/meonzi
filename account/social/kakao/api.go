@@ -4,20 +4,20 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"net/http"
+
+	log "github.com/sirupsen/logrus"
 )
 
 const (
 	endPoint = "https://kapi.kakao.com"
-
 )
 
 type User interface {
 	GetMe(ctx context.Context, token string) (res UserInfo, err error)
 }
 
-type userApi struct {}
+type userApi struct{}
 
 func NewUserClient() User {
 	return &userApi{}
