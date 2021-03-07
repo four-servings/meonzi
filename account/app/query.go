@@ -1,4 +1,4 @@
-package application
+package app
 
 // import "github/four-servings/meonzi/account/infrastructure"
 

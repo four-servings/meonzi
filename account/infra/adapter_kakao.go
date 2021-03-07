@@ -1,10 +1,10 @@
-package infrastructure
+package infra
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github/four-servings/meonzi/account/application"
+	"github/four-servings/meonzi/account/app"
 	"github/four-servings/meonzi/account/domain"
 	"net/http"
 
@@ -20,7 +20,6 @@ type (
 
 	kakaoUser struct {
 		id           string
-		authProvider domain.AuthProvider
 	}
 
 	kakaoError struct {
@@ -37,7 +36,11 @@ const (
 	endPoint = "https://kapi.kakao.com"
 )
 
-func (k *kakaoAdapter) GetUser(ctx context.Context, token string) (user application.ThirdUser, err error) {
+func NewKakaoAdapter() app.KakaoAdapter {
+	return &kakaoAdapter{}
+}
+
+func (k *kakaoAdapter) GetUser(ctx context.Context, token string) (user app.ThirdUser, err error) {
 	url := fmt.Sprintf("%s%s", endPoint, "/v2/user/me?secure_resource=true")
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
@@ -56,12 +59,12 @@ func (k *kakaoAdapter) GetUser(ctx context.Context, token string) (user applicat
 	defer resp.Body.Close()
 	decoder := json.NewDecoder(resp.Body)
 
-	res := kakaoUserResponse{}
+	var model kakaoUserResponse
 
 	switch resp.StatusCode {
 	case http.StatusOK:
-		err = decoder.Decode(&res)
-		return kakaoUser{id: fmt.Sprint(res.ID), authProvider: domain.KakaoServiceProviderKey}, err
+		err = decoder.Decode(&model)
+		user = kakaoUser{id: fmt.Sprint(model.ID)}
 	default:
 		var clientError kakaoError
 		err = decoder.Decode(&clientError)

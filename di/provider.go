@@ -2,7 +2,7 @@ package di
 
 import (
 	"context"
-	"github/four-servings/meonzi/account/infrastructure"
+	"github/four-servings/meonzi/account/infra"
 	"github/four-servings/meonzi/ent"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -33,5 +33,5 @@ var ProviderSets = wire.NewSet(
 
 // repositories
 var RepositorySets = wire.NewSet(
-	infrastructure.NewAccountRepository,
+	infra.NewAccountRepository,
 )

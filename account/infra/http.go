@@ -1,6 +1,7 @@
-package infrastructure
+package infra
 
 import (
+	"github.com/labstack/echo/v4"
 	"github/four-servings/meonzi/account/interfaces"
 	"net/http"
 )
@@ -11,7 +12,6 @@ type handler struct {
 
 func NewRouter(e *echo.Echo, controller interfaces.Controller) {
 	handler := handler{controller}
-	e := echo.New()
 	e.POST("/account", handler.registerAccount)
 }
 
@@ -26,7 +26,6 @@ func (h *handler) registerAccount(ctx echo.Context) error {
 		return ctx.NoContent(http.StatusBadRequest)
 	}
 
-	ctx.Validate(binder)
 	dto := interfaces.RegisterAccountDTO{
 		Token:    binder.Token,
 		Name:     binder.Name,

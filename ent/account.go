@@ -24,8 +24,6 @@ type Account struct {
 	SocialID string `json:"social_id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
-	// LastAccessedAt holds the value of the "last_accessed_at" field.
-	LastAccessedAt time.Time `json:"last_accessed_at,omitempty"`
 	// CreateAt holds the value of the "create_at" field.
 	CreateAt time.Time `json:"create_at,omitempty"`
 	// UpdateAt holds the value of the "update_at" field.
@@ -43,7 +41,7 @@ func (*Account) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = &sql.NullInt64{}
 		case account.FieldSocialID, account.FieldName:
 			values[i] = &sql.NullString{}
-		case account.FieldLastAccessedAt, account.FieldCreateAt, account.FieldUpdateAt, account.FieldDeleteAt:
+		case account.FieldCreateAt, account.FieldUpdateAt, account.FieldDeleteAt:
 			values[i] = &sql.NullTime{}
 		case account.FieldID:
 			values[i] = &uuid.UUID{}
@@ -85,12 +83,6 @@ func (a *Account) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
 				a.Name = value.String
-			}
-		case account.FieldLastAccessedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field last_accessed_at", values[i])
-			} else if value.Valid {
-				a.LastAccessedAt = value.Time
 			}
 		case account.FieldCreateAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -145,8 +137,6 @@ func (a *Account) String() string {
 	builder.WriteString(a.SocialID)
 	builder.WriteString(", name=")
 	builder.WriteString(a.Name)
-	builder.WriteString(", last_accessed_at=")
-	builder.WriteString(a.LastAccessedAt.Format(time.ANSIC))
 	builder.WriteString(", create_at=")
 	builder.WriteString(a.CreateAt.Format(time.ANSIC))
 	builder.WriteString(", update_at=")

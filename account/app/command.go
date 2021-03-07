@@ -1,8 +1,9 @@
-package application
+package app
 
 import (
 	"context"
 	"github/four-servings/meonzi/account/domain"
+	"github/four-servings/meonzi/account/infra"
 	"github/four-servings/meonzi/local"
 	"time"
 
@@ -24,7 +25,7 @@ type (
 	}
 )
 
-func NewCommandBus(accountRepo domain.AccountRepository, eventBus, timeout time.Duration, kakaoAdapter KakaoAdapter, googleAdapter GoogleAdapter) (bus CommandBus) {
+func NewCommandBus(accountRepo domain.AccountRepository, kakaoAdapter KakaoAdapter, googleAdapter GoogleAdapter, timeout time.Duration) (bus CommandBus) {
 	handler := commandHandler{accountRepo, kakaoAdapter, googleAdapter}
 	bus = CommandBus(local.NewBusWithTimeout(timeout))
 
@@ -49,10 +50,11 @@ type RegisterAccountCommand struct {
 	Provider domain.AuthProvider
 }
 
-func (ch *commandHandler) RegisterAccountHandle(ctx context.Context, command RegisterAccountCommand) error {
+func (ch *commandHandler) RegisterAccountHandle(ctx context.Context, command RegisterAccountCommand) (err error) {
 	id, err := ch.AccountRepository.FindNewID()
 	if err != nil {
 		log.WithError(err).Error("Can not get new account ID")
+		return
 	}
 
 	var thirdUser ThirdUser
@@ -61,6 +63,7 @@ func (ch *commandHandler) RegisterAccountHandle(ctx context.Context, command Reg
 		thirdUser, err = ch.KakaoAdapter.GetUser(ctx, command.Token)
 		if err != nil {
 			log.WithError(err).Error("Can not fetch kakao user")
+			return
 		}
 	}
 
@@ -78,12 +81,23 @@ func (ch *commandHandler) RegisterAccountHandle(ctx context.Context, command Reg
 		SocialID:     thirdUser.ID(),
 	})
 
-	err = ch.AccountRepository.Save(ctx, account)
+	account, err = ch.AccountRepository.Save(ctx, account)
 	if err != nil {
 		log.WithError(err).Error("Can not save account")
 	}
 
 	return nil
+}
+
+func (ch *commandHandler) getSocialAdpater(provider domain.AuthProvider, token string) SocialAdapter {
+	switch provider {
+	case domain.GoogleServiceProviderKey:
+		return ch.GoogleAdapter
+	case domain.KakaoServiceProviderKey:
+		return ch.KakaoAdapter
+	}
+
+	return infra.UnknownAdapter
 }
 
 type DeregisterAccountCommand struct {
@@ -98,7 +112,7 @@ func (ch *commandHandler) DeregisterAccountHandle(ctx context.Context, command D
 
 	account.Deregister()
 
-	err = ch.AccountRepository.Save(ctx, account)
+	account, err = ch.AccountRepository.Save(ctx, account)
 	if err != nil {
 		log.WithError(err).Error("Can not save account")
 	}

@@ -4,8 +4,6 @@ package account
 
 import (
 	"time"
-
-	"github.com/google/uuid"
 )
 
 const (
@@ -19,8 +17,6 @@ const (
 	FieldSocialID = "social_id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// FieldLastAccessedAt holds the string denoting the last_accessed_at field in the database.
-	FieldLastAccessedAt = "last_accessed_at"
 	// FieldCreateAt holds the string denoting the create_at field in the database.
 	FieldCreateAt = "create_at"
 	// FieldUpdateAt holds the string denoting the update_at field in the database.
@@ -38,7 +34,6 @@ var Columns = []string{
 	FieldSocialType,
 	FieldSocialID,
 	FieldName,
-	FieldLastAccessedAt,
 	FieldCreateAt,
 	FieldUpdateAt,
 	FieldDeleteAt,
@@ -65,6 +60,4 @@ var (
 	DefaultUpdateAt func() time.Time
 	// UpdateDefaultUpdateAt holds the default value on update for the "update_at" field.
 	UpdateDefaultUpdateAt func() time.Time
-	// DefaultID holds the default value on creation for the "id" field.
-	DefaultID func() uuid.UUID
 )

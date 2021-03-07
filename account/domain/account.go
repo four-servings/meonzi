@@ -11,32 +11,36 @@ import (
 // NewAccount create new account object
 func NewAccount(options NewAccountOptions) Account {
 	return &accountImpl{
-		id:           options.ID,
-		name:         options.Name,
-		authProvider: options.AuthProvider,
-		socialID:     options.SocialID,
-		createdAt:    time.Now(),
-		updatedAt:    time.Now(),
-		deletedAt:    nil,
+		AccountData: AccountData{
+			ID:           options.ID,
+			Name:         options.Name,
+			AuthProvider: options.AuthProvider,
+			SocialID:     options.SocialID,
+			CreatedAt:    time.Now(),
+			UpdatedAt:    time.Now(),
+			DeletedAt:    nil,
+		},
 	}
 }
 
-// ReconstituteAccount reconstitede account object
+// ReconstituteAccount reconstitute account object
 func ReconstituteAccount(options ReconstituteAccountOptions) Account {
 	return &accountImpl{
-		id:           options.ID,
-		authProvider: options.AuthProvider,
-		socialID:     options.SocialID,
-		name:         options.Name,
-		createdAt:    options.CreatedAt,
-		updatedAt:    options.UpdatedAt,
-		deletedAt:    options.DeletedAt,
+		AccountData: AccountData{
+			ID:           options.ID,
+			Name:         options.Name,
+			AuthProvider: options.AuthProvider,
+			SocialID:     options.SocialID,
+			CreatedAt:    options.CreatedAt,
+			UpdatedAt:    options.UpdatedAt,
+			DeletedAt:    options.DeletedAt,
+		},
 	}
 }
 
 // NewAccountOptions account option for create new account
 type NewAccountOptions struct {
-	ID           string
+	ID           uuid.UUID
 	Name         string
 	AuthProvider AuthProvider
 	SocialID     string
@@ -44,7 +48,17 @@ type NewAccountOptions struct {
 
 // ReconstituteAccountOptions reconstitute option for reconstitute account
 type ReconstituteAccountOptions struct {
-	ID           string
+	ID           uuid.UUID
+	Name         string
+	AuthProvider AuthProvider
+	SocialID     string
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+	DeletedAt    *time.Time
+}
+
+type AccountData struct {
+	ID           uuid.UUID
 	Name         string
 	AuthProvider AuthProvider
 	SocialID     string
@@ -58,11 +72,12 @@ type Account interface {
 	Events() []interface{}
 	Apply(interface{})
 	Deregister()
+	Data() AccountData
 }
 
 // Deregister deregister account
 func (a *accountImpl) Deregister() {
-	a.deletedAt = pointer.Time(time.Now())
+	a.DeletedAt = pointer.Time(time.Now())
 }
 
 // Events get applied account events
@@ -76,6 +91,19 @@ func (a *accountImpl) Apply(event interface{}) {
 	a.events = append(a.events, event)
 }
 
+func (a *accountImpl) Data() AccountData {
+	data := a.AccountData
+
+	//deep copy
+	if data.DeletedAt != nil {
+		deleteAt := new(time.Time)
+		*deleteAt = *data.DeletedAt
+		data.DeletedAt = deleteAt
+	}
+
+	return data
+}
+
 const (
 	// KakaoServiceProviderKey key for AuthProvider value
 	KakaoServiceProviderKey = AuthProvider("KAKAO")
@@ -85,13 +113,7 @@ const (
 )
 
 type accountImpl struct {
-	id           string
-	authProvider AuthProvider
-	socialID     string
-	name         string
-	createdAt    time.Time
-	updatedAt    time.Time
-	deletedAt    *time.Time
+	AccountData
 	events       []interface{}
 }
 
@@ -100,8 +122,8 @@ type AuthProvider string
 
 // AccountRepository account repository
 type AccountRepository interface {
-	Save(ctx context.Context, account Account) error
+	Save(ctx context.Context, account Account) (Account, error)
 	FindByID(ctx context.Context, id uuid.UUID) (Account, error)
-	FindNewID() (string, error)
+	FindNewID(ctx context.Context) (uuid.UUID, error)
 	FindByProviderAndSocialID(ctx context.Context, provider AuthProvider, socialID string) (Account, error)
 }

@@ -1,7 +1,7 @@
 package interfaces
 
 import (
-	"github/four-servings/meonzi/account/application"
+	"github/four-servings/meonzi/account/app"
 )
 
 type RegisterAccountDTO struct {
@@ -15,7 +15,7 @@ type Controller interface {
 }
 
 type ControllerImpl struct {
-	application.CommandBus
+	app.CommandBus
 }
 
 func (c *ControllerImpl) RegisterAccount(dto RegisterAccountDTO) {
@@ -23,7 +23,7 @@ func (c *ControllerImpl) RegisterAccount(dto RegisterAccountDTO) {
 	if err != nil {
 
 	}
-	c.CommandBus.Execute(application.RegisterAccountCommand{
+	c.CommandBus.Execute(app.RegisterAccountCommand{
 		Name: dto.Name,
 	})
 }

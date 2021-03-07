@@ -1,4 +1,4 @@
-package infrastructure
+package infra
 
 import (
 	"github/four-servings/meonzi/ent"

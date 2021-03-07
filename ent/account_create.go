@@ -40,20 +40,6 @@ func (ac *AccountCreate) SetName(s string) *AccountCreate {
 	return ac
 }
 
-// SetNillableName sets the "name" field if the given value is not nil.
-func (ac *AccountCreate) SetNillableName(s *string) *AccountCreate {
-	if s != nil {
-		ac.SetName(*s)
-	}
-	return ac
-}
-
-// SetLastAccessedAt sets the "last_accessed_at" field.
-func (ac *AccountCreate) SetLastAccessedAt(t time.Time) *AccountCreate {
-	ac.mutation.SetLastAccessedAt(t)
-	return ac
-}
-
 // SetCreateAt sets the "create_at" field.
 func (ac *AccountCreate) SetCreateAt(t time.Time) *AccountCreate {
 	ac.mutation.SetCreateAt(t)
@@ -162,10 +148,6 @@ func (ac *AccountCreate) defaults() {
 		v := account.DefaultUpdateAt()
 		ac.mutation.SetUpdateAt(v)
 	}
-	if _, ok := ac.mutation.ID(); !ok {
-		v := account.DefaultID()
-		ac.mutation.SetID(v)
-	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -181,13 +163,13 @@ func (ac *AccountCreate) check() error {
 			return &ValidationError{Name: "social_id", err: fmt.Errorf("ent: validator failed for field \"social_id\": %w", err)}
 		}
 	}
+	if _, ok := ac.mutation.Name(); !ok {
+		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
+	}
 	if v, ok := ac.mutation.Name(); ok {
 		if err := account.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
 		}
-	}
-	if _, ok := ac.mutation.LastAccessedAt(); !ok {
-		return &ValidationError{Name: "last_accessed_at", err: errors.New("ent: missing required field \"last_accessed_at\"")}
 	}
 	if _, ok := ac.mutation.CreateAt(); !ok {
 		return &ValidationError{Name: "create_at", err: errors.New("ent: missing required field \"create_at\"")}
@@ -247,14 +229,6 @@ func (ac *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 			Column: account.FieldName,
 		})
 		_node.Name = value
-	}
-	if value, ok := ac.mutation.LastAccessedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: account.FieldLastAccessedAt,
-		})
-		_node.LastAccessedAt = value
 	}
 	if value, ok := ac.mutation.CreateAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

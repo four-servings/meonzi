@@ -116,13 +116,6 @@ func Name(v string) predicate.Account {
 	})
 }
 
-// LastAccessedAt applies equality check predicate on the "last_accessed_at" field. It's identical to LastAccessedAtEQ.
-func LastAccessedAt(v time.Time) predicate.Account {
-	return predicate.Account(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLastAccessedAt), v))
-	})
-}
-
 // CreateAt applies equality check predicate on the "create_at" field. It's identical to CreateAtEQ.
 func CreateAt(v time.Time) predicate.Account {
 	return predicate.Account(func(s *sql.Selector) {
@@ -434,20 +427,6 @@ func NameHasSuffix(v string) predicate.Account {
 	})
 }
 
-// NameIsNil applies the IsNil predicate on the "name" field.
-func NameIsNil() predicate.Account {
-	return predicate.Account(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldName)))
-	})
-}
-
-// NameNotNil applies the NotNil predicate on the "name" field.
-func NameNotNil() predicate.Account {
-	return predicate.Account(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldName)))
-	})
-}
-
 // NameEqualFold applies the EqualFold predicate on the "name" field.
 func NameEqualFold(v string) predicate.Account {
 	return predicate.Account(func(s *sql.Selector) {
@@ -459,82 +438,6 @@ func NameEqualFold(v string) predicate.Account {
 func NameContainsFold(v string) predicate.Account {
 	return predicate.Account(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldName), v))
-	})
-}
-
-// LastAccessedAtEQ applies the EQ predicate on the "last_accessed_at" field.
-func LastAccessedAtEQ(v time.Time) predicate.Account {
-	return predicate.Account(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLastAccessedAt), v))
-	})
-}
-
-// LastAccessedAtNEQ applies the NEQ predicate on the "last_accessed_at" field.
-func LastAccessedAtNEQ(v time.Time) predicate.Account {
-	return predicate.Account(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldLastAccessedAt), v))
-	})
-}
-
-// LastAccessedAtIn applies the In predicate on the "last_accessed_at" field.
-func LastAccessedAtIn(vs ...time.Time) predicate.Account {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Account(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.In(s.C(FieldLastAccessedAt), v...))
-	})
-}
-
-// LastAccessedAtNotIn applies the NotIn predicate on the "last_accessed_at" field.
-func LastAccessedAtNotIn(vs ...time.Time) predicate.Account {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Account(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.NotIn(s.C(FieldLastAccessedAt), v...))
-	})
-}
-
-// LastAccessedAtGT applies the GT predicate on the "last_accessed_at" field.
-func LastAccessedAtGT(v time.Time) predicate.Account {
-	return predicate.Account(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldLastAccessedAt), v))
-	})
-}
-
-// LastAccessedAtGTE applies the GTE predicate on the "last_accessed_at" field.
-func LastAccessedAtGTE(v time.Time) predicate.Account {
-	return predicate.Account(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldLastAccessedAt), v))
-	})
-}
-
-// LastAccessedAtLT applies the LT predicate on the "last_accessed_at" field.
-func LastAccessedAtLT(v time.Time) predicate.Account {
-	return predicate.Account(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldLastAccessedAt), v))
-	})
-}
-
-// LastAccessedAtLTE applies the LTE predicate on the "last_accessed_at" field.
-func LastAccessedAtLTE(v time.Time) predicate.Account {
-	return predicate.Account(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldLastAccessedAt), v))
 	})
 }
 

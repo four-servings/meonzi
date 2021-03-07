@@ -7,7 +7,7 @@ package main
 
 import (
 	"github/four-servings/meonzi/account/domain"
-	"github/four-servings/meonzi/account/infrastructure"
+	"github/four-servings/meonzi/account/infra"
 	"github/four-servings/meonzi/config"
 	"github/four-servings/meonzi/di"
 )
@@ -18,6 +18,6 @@ func exampleGetAccountRepository() domain.AccountRepository {
 	dbConn := config.GetDBConn()
 	client := di.ProviderDatabase(dbConn)
 	accountClient := di.ProviderAccountTable(client)
-	accountRepository := infrastructure.NewAccountRepository(accountClient)
+	accountRepository := infra.NewAccountRepository(accountClient)
 	return accountRepository
 }

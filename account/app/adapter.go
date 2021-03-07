@@ -1,4 +1,4 @@
-package application
+package app
 
 import (
 	"context"
@@ -6,14 +6,18 @@ import (
 )
 
 type (
+	SocialAdapter interface {
+		GetUser(ctx context.Context, token string) (ThirdUser, error)
+	}
+
 	// KakaoAdapter kakao service adapter
 	KakaoAdapter interface {
-		GetUser(ctx context.Context, token string) (ThirdUser, error)
+		SocialAdapter
 	}
 
 	// GoogleAdapter google service adapter
 	GoogleAdapter interface {
-		GetUser(ctx context.Context, token string) (ThirdUser, error)
+		SocialAdapter
 	}
 
 	// ThirdUser third party user data

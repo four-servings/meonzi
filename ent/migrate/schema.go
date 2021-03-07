@@ -13,8 +13,7 @@ var (
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "social_type", Type: field.TypeUint8},
 		{Name: "social_id", Type: field.TypeString, Size: 30},
-		{Name: "name", Type: field.TypeString, Nullable: true, Size: 30},
-		{Name: "last_accessed_at", Type: field.TypeTime},
+		{Name: "name", Type: field.TypeString, Size: 30},
 		{Name: "create_at", Type: field.TypeTime},
 		{Name: "update_at", Type: field.TypeTime},
 		{Name: "delete_at", Type: field.TypeTime, Nullable: true},
@@ -34,7 +33,7 @@ var (
 			{
 				Name:    "account_delete_at",
 				Unique:  false,
-				Columns: []*schema.Column{AccountsColumns[7]},
+				Columns: []*schema.Column{AccountsColumns[6]},
 			},
 		},
 	}

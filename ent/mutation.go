@@ -30,21 +30,20 @@ const (
 // AccountMutation represents an operation that mutates the Account nodes in the graph.
 type AccountMutation struct {
 	config
-	op               Op
-	typ              string
-	id               *uuid.UUID
-	social_type      *schema.SocialType
-	addsocial_type   *schema.SocialType
-	social_id        *string
-	name             *string
-	last_accessed_at *time.Time
-	create_at        *time.Time
-	update_at        *time.Time
-	delete_at        *time.Time
-	clearedFields    map[string]struct{}
-	done             bool
-	oldValue         func(context.Context) (*Account, error)
-	predicates       []predicate.Account
+	op             Op
+	typ            string
+	id             *uuid.UUID
+	social_type    *schema.SocialType
+	addsocial_type *schema.SocialType
+	social_id      *string
+	name           *string
+	create_at      *time.Time
+	update_at      *time.Time
+	delete_at      *time.Time
+	clearedFields  map[string]struct{}
+	done           bool
+	oldValue       func(context.Context) (*Account, error)
+	predicates     []predicate.Account
 }
 
 var _ ent.Mutation = (*AccountMutation)(nil)
@@ -255,58 +254,9 @@ func (m *AccountMutation) OldName(ctx context.Context) (v string, err error) {
 	return oldValue.Name, nil
 }
 
-// ClearName clears the value of the "name" field.
-func (m *AccountMutation) ClearName() {
-	m.name = nil
-	m.clearedFields[account.FieldName] = struct{}{}
-}
-
-// NameCleared returns if the "name" field was cleared in this mutation.
-func (m *AccountMutation) NameCleared() bool {
-	_, ok := m.clearedFields[account.FieldName]
-	return ok
-}
-
 // ResetName resets all changes to the "name" field.
 func (m *AccountMutation) ResetName() {
 	m.name = nil
-	delete(m.clearedFields, account.FieldName)
-}
-
-// SetLastAccessedAt sets the "last_accessed_at" field.
-func (m *AccountMutation) SetLastAccessedAt(t time.Time) {
-	m.last_accessed_at = &t
-}
-
-// LastAccessedAt returns the value of the "last_accessed_at" field in the mutation.
-func (m *AccountMutation) LastAccessedAt() (r time.Time, exists bool) {
-	v := m.last_accessed_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldLastAccessedAt returns the old "last_accessed_at" field's value of the Account entity.
-// If the Account object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AccountMutation) OldLastAccessedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldLastAccessedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldLastAccessedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldLastAccessedAt: %w", err)
-	}
-	return oldValue.LastAccessedAt, nil
-}
-
-// ResetLastAccessedAt resets all changes to the "last_accessed_at" field.
-func (m *AccountMutation) ResetLastAccessedAt() {
-	m.last_accessed_at = nil
 }
 
 // SetCreateAt sets the "create_at" field.
@@ -444,7 +394,7 @@ func (m *AccountMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AccountMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 6)
 	if m.social_type != nil {
 		fields = append(fields, account.FieldSocialType)
 	}
@@ -453,9 +403,6 @@ func (m *AccountMutation) Fields() []string {
 	}
 	if m.name != nil {
 		fields = append(fields, account.FieldName)
-	}
-	if m.last_accessed_at != nil {
-		fields = append(fields, account.FieldLastAccessedAt)
 	}
 	if m.create_at != nil {
 		fields = append(fields, account.FieldCreateAt)
@@ -480,8 +427,6 @@ func (m *AccountMutation) Field(name string) (ent.Value, bool) {
 		return m.SocialID()
 	case account.FieldName:
 		return m.Name()
-	case account.FieldLastAccessedAt:
-		return m.LastAccessedAt()
 	case account.FieldCreateAt:
 		return m.CreateAt()
 	case account.FieldUpdateAt:
@@ -503,8 +448,6 @@ func (m *AccountMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldSocialID(ctx)
 	case account.FieldName:
 		return m.OldName(ctx)
-	case account.FieldLastAccessedAt:
-		return m.OldLastAccessedAt(ctx)
 	case account.FieldCreateAt:
 		return m.OldCreateAt(ctx)
 	case account.FieldUpdateAt:
@@ -540,13 +483,6 @@ func (m *AccountMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetName(v)
-		return nil
-	case account.FieldLastAccessedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetLastAccessedAt(v)
 		return nil
 	case account.FieldCreateAt:
 		v, ok := value.(time.Time)
@@ -614,9 +550,6 @@ func (m *AccountMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *AccountMutation) ClearedFields() []string {
 	var fields []string
-	if m.FieldCleared(account.FieldName) {
-		fields = append(fields, account.FieldName)
-	}
 	if m.FieldCleared(account.FieldDeleteAt) {
 		fields = append(fields, account.FieldDeleteAt)
 	}
@@ -634,9 +567,6 @@ func (m *AccountMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *AccountMutation) ClearField(name string) error {
 	switch name {
-	case account.FieldName:
-		m.ClearName()
-		return nil
 	case account.FieldDeleteAt:
 		m.ClearDeleteAt()
 		return nil
@@ -656,9 +586,6 @@ func (m *AccountMutation) ResetField(name string) error {
 		return nil
 	case account.FieldName:
 		m.ResetName()
-		return nil
-	case account.FieldLastAccessedAt:
-		m.ResetLastAccessedAt()
 		return nil
 	case account.FieldCreateAt:
 		m.ResetCreateAt()
