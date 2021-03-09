@@ -2,7 +2,11 @@ package di
 
 import (
 	"context"
+	"github.com/go-playground/validator/v10"
+	"github.com/labstack/echo/v4"
+	accountApp "github/four-servings/meonzi/account/app"
 	"github/four-servings/meonzi/account/infra"
+	"github/four-servings/meonzi/account/interfaces"
 	"github/four-servings/meonzi/ent"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -25,13 +29,39 @@ func ProviderAccountTable(cli *ent.Client) *ent.AccountClient {
 	return cli.Account
 }
 
-// providers
+func ProviderEcho() (e *echo.Echo) {
+	e = echo.New()
+	return
+}
+
+func ProviderValidator() (v *validator.Validate) {
+	v = validator.New()
+	return
+}
+
 var ProviderSets = wire.NewSet(
 	ProviderDatabase,
 	ProviderAccountTable,
+	ProviderEcho,
+	ProviderValidator,
 )
 
-// repositories
-var RepositorySets = wire.NewSet(
+var InfraSets = wire.NewSet(
 	infra.NewAccountRepository,
+	infra.NewKakaoAdapter,
+	infra.NewGoogleAdapter,
+	infra.NewSocialService,
+	infra.NewAuthService,
+)
+
+var CommandBusSets = wire.NewSet(
+	accountApp.NewCommandBus,
+)
+
+var ControllerSets = wire.NewSet(
+	interfaces.NewAccountController,
+)
+
+var RouteSets = wire.NewSet(
+	infra.NewRoute,
 )

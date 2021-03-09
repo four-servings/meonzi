@@ -1,4 +1,4 @@
-package config
+package app
 
 import (
 	"fmt"
@@ -7,12 +7,11 @@ import (
 	"time"
 
 	"github.com/caarlos0/env/v6"
-	"github.com/google/wire"
 )
 
 var config struct {
 	DbUser string `env:"DATABASE_USER" envDefault:"root"`
-	DbPass string `env:"DATABASE_PASS" envDefault:"test"`
+	DbPass string `env:"DATABASE_PASS" envDefault:"qaz456"`
 	DbHost string `env:"DATABASE_HOST" envDefault:"localhost"`
 	DbName string `env:"DATABASE_NAME" envDefault:"meonzi"`
 	DbPort uint16 `env:"DATABASE_PORT" envDefault:"3306"`
@@ -47,8 +46,3 @@ func GetDBConn() di.DBConn {
 		config.DbName,
 		val.Encode()))
 }
-
-// config
-var ConfigSets = wire.NewSet(
-	GetDBConn,
-)

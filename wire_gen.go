@@ -6,18 +6,37 @@
 package main
 
 import (
-	"github/four-servings/meonzi/account/domain"
+	app2 "github/four-servings/meonzi/account/app"
 	"github/four-servings/meonzi/account/infra"
-	"github/four-servings/meonzi/config"
+	"github/four-servings/meonzi/account/interfaces"
+	"github/four-servings/meonzi/app"
 	"github/four-servings/meonzi/di"
+	"time"
 )
 
 // Injectors from wire.go:
 
-func exampleGetAccountRepository() domain.AccountRepository {
-	dbConn := config.GetDBConn()
+func GetApp() *app.App {
+	dbConn := app.GetDBConn()
 	client := di.ProviderDatabase(dbConn)
+	echo := di.ProviderEcho()
 	accountClient := di.ProviderAccountTable(client)
 	accountRepository := infra.NewAccountRepository(accountClient)
-	return accountRepository
+	googleAdapter := infra.NewGoogleAdapter()
+	kakaoAdapter := infra.NewKakaoAdapter()
+	socialService := infra.NewSocialService(googleAdapter, kakaoAdapter)
+	duration := _wireDurationValue
+	commandBus := app2.NewCommandBus(accountRepository, socialService, duration)
+	validate := di.ProviderValidator()
+	authService := infra.NewAuthService()
+	controller := interfaces.NewAccountController(commandBus, validate, authService)
+	routing := infra.NewRoute(echo, controller)
+	setRoute := app.Routing(routing)
+	appApp := app.NewApp(client, echo, setRoute)
+	return appApp
 }
+
+var (
+	_wireDurationValue = time.Second *
+		3
+)

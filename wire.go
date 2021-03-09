@@ -3,19 +3,25 @@
 package main
 
 import (
-	"github/four-servings/meonzi/account/domain"
-	"github/four-servings/meonzi/account/infra"
-	"github/four-servings/meonzi/config"
-	"github/four-servings/meonzi/di"
-
 	"github.com/google/wire"
+	"github/four-servings/meonzi/app"
+	"github/four-servings/meonzi/di"
+	"time"
 )
 
-func exampleGetAccountRepository() domain.AccountRepository {
+//func exampleGetAccountRepository() domain.AccountRepository {
+//	wire.Build(di.ConfigSets)
+//	return nil
+//}
+
+func GetApp() *app.App {
 	wire.Build(
-		config.ConfigSets,
 		di.ProviderSets,
-		infra.NewAccountRepository,
-	)
+		di.InfraSets,
+		wire.Value(time.Second * 3),
+		di.CommandBusSets,
+		di.ControllerSets,
+		di.RouteSets,
+		app.AppSets)
 	return nil
 }
