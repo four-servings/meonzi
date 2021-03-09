@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	log "github.com/sirupsen/logrus"
-	"github/four-servings/meonzi/account/app"
 	"github/four-servings/meonzi/account/domain"
 	"net/http"
 	"net/url"
@@ -31,11 +30,11 @@ func (e googleError) Error() string {
 	return e.ErrorDescription
 }
 
-func NewGoogleAdapter() app.GoogleAdapter {
+func NewGoogleAdapter() domain.GoogleAdapter {
 	return &googleAdapter{}
 }
 
-func (*googleAdapter) GetUser(ctx context.Context, token string) (user app.ThirdUser, err error)  {
+func (*googleAdapter) GetUser(ctx context.Context, token string) (user domain.ThirdUser, err error)  {
 	val := make(url.Values)
 	val.Add("id_token", token)
 

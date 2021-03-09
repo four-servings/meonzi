@@ -2,8 +2,8 @@ package app
 
 import (
 	"context"
+	"errors"
 	"github/four-servings/meonzi/account/domain"
-	"github/four-servings/meonzi/account/infra"
 	"github/four-servings/meonzi/local"
 	"time"
 
@@ -20,14 +20,13 @@ type (
 
 	commandHandler struct {
 		domain.AccountRepository
-		KakaoAdapter
-		GoogleAdapter
+		domain.SocialService
 	}
 )
 
-func NewCommandBus(accountRepo domain.AccountRepository, kakaoAdapter KakaoAdapter, googleAdapter GoogleAdapter, timeout time.Duration) (bus CommandBus) {
-	handler := commandHandler{accountRepo, kakaoAdapter, googleAdapter}
-	bus = CommandBus(local.NewBusWithTimeout(timeout))
+func NewCommandBus(accountRepo domain.AccountRepository, socialService domain.SocialService, timeout time.Duration) (bus CommandBus) {
+	handler := commandHandler{accountRepo, socialService}
+	bus = local.NewBusWithTimeout(timeout)
 
 	g, _ := errgroup.WithContext(context.Background())
 	g.Go(func() error {
@@ -51,59 +50,46 @@ type RegisterAccountCommand struct {
 }
 
 func (ch *commandHandler) RegisterAccountHandle(ctx context.Context, command RegisterAccountCommand) (err error) {
-	id, err := ch.AccountRepository.FindNewID()
+	id, err := ch.AccountRepository.FindNewID(ctx)
 	if err != nil {
 		log.WithError(err).Error("Can not get new account ID")
 		return
 	}
 
-	var thirdUser ThirdUser
-
-	if command.Provider == domain.KakaoServiceProviderKey {
-		thirdUser, err = ch.KakaoAdapter.GetUser(ctx, command.Token)
-		if err != nil {
-			log.WithError(err).Error("Can not fetch kakao user")
-			return
-		}
+	thirdUser, err := ch.SocialService.GetUser(ctx, command.Provider, command.Token)
+	if err != nil {
+		log.WithError(err).Errorf("Can not fetch %s user", command.Provider)
+		return
 	}
 
-	if command.Provider == domain.GoogleServiceProviderKey {
-		thirdUser, err = ch.GoogleAdapter.GetUser(ctx, command.Token)
-		if err != nil {
-			log.WithError(err).Error("Can not fetch google user")
-		}
+	exists, _ := ch.AccountRepository.FindByProviderAndSocialID(ctx, command.Provider, command.Token)
+	if exists != nil {
+		err = errors.New("exists account")
+		log.Error("Account is exists")
+		return
 	}
 
 	account := domain.NewAccount(domain.NewAccountOptions{
 		ID:           id,
 		Name:         command.Name,
-		AuthProvider: command.Provider,
+		AuthProvider: thirdUser.AuthProvider(),
 		SocialID:     thirdUser.ID(),
 	})
 
 	account, err = ch.AccountRepository.Save(ctx, account)
 	if err != nil {
 		log.WithError(err).Error("Can not save account")
+		return
 	}
 
 	return nil
-}
-
-func (ch *commandHandler) getSocialAdpater(provider domain.AuthProvider, token string) SocialAdapter {
-	switch provider {
-	case domain.GoogleServiceProviderKey:
-		return ch.GoogleAdapter
-	case domain.KakaoServiceProviderKey:
-		return ch.KakaoAdapter
-	}
-
-	return infra.UnknownAdapter
 }
 
 type DeregisterAccountCommand struct {
 	ID uuid.UUID
 }
 
+//TODO refactor, error handling on http handler
 func (ch *commandHandler) DeregisterAccountHandle(ctx context.Context, command DeregisterAccountCommand) error {
 	account, err := ch.AccountRepository.FindByID(ctx, command.ID)
 	if err != nil {

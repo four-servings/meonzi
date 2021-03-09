@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github/four-servings/meonzi/account/app"
 	"github/four-servings/meonzi/account/domain"
 	"net/http"
 
@@ -36,11 +35,11 @@ const (
 	endPoint = "https://kapi.kakao.com"
 )
 
-func NewKakaoAdapter() app.KakaoAdapter {
+func NewKakaoAdapter() domain.KakaoAdapter {
 	return &kakaoAdapter{}
 }
 
-func (k *kakaoAdapter) GetUser(ctx context.Context, token string) (user app.ThirdUser, err error) {
+func (k *kakaoAdapter) GetUser(ctx context.Context, token string) (user domain.ThirdUser, err error) {
 	url := fmt.Sprintf("%s%s", endPoint, "/v2/user/me?secure_resource=true")
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {

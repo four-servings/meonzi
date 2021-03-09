@@ -1,9 +1,6 @@
-package app
+package domain
 
-import (
-	"context"
-	"github/four-servings/meonzi/account/domain"
-)
+import "context"
 
 type (
 	SocialAdapter interface {
@@ -11,18 +8,14 @@ type (
 	}
 
 	// KakaoAdapter kakao service adapter
-	KakaoAdapter interface {
-		SocialAdapter
-	}
+	KakaoAdapter SocialAdapter
 
 	// GoogleAdapter google service adapter
-	GoogleAdapter interface {
-		SocialAdapter
-	}
+	GoogleAdapter SocialAdapter
 
 	// ThirdUser third party user data
 	ThirdUser interface {
 		ID() string
-		AuthProvider() domain.AuthProvider
+		AuthProvider() AuthProvider
 	}
 )
