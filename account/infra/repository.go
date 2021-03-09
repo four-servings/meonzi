@@ -50,6 +50,10 @@ func (r *repo) Save(ctx context.Context, account domain.Account) (saved domain.A
 	}
 
 	entity, err = save(ctx)
+	if err != nil {
+		log.WithError(err).Error("account save exception")
+		return
+	}
 	saved = convertEntityToDomain(entity)
 	return
 }

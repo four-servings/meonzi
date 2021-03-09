@@ -1,33 +1,77 @@
 package interfaces
 
 import (
+	"context"
+	"errors"
+	"github.com/go-playground/validator/v10"
+	log "github.com/sirupsen/logrus"
 	"github/four-servings/meonzi/account/app"
+	"github/four-servings/meonzi/account/domain"
 )
 
 type RegisterAccountDTO struct {
-	Name     string `validate:"required"`
-	Token    string
-	Provider string
+	Name     string `validate:"required,min=2,max=8"`
+	Token    string `validate:"required"`
+	Provider string `validate:"required,eq=KAKAO|eq=GOOGLE"`
+}
+
+type SignInAccountDTO struct {
+	Token string `validate:"required"`
+	Provider string `validate:"required,eq=KAKAO|eq=GOOGLE"`
 }
 
 type Controller interface {
-	RegisterAccount(dto RegisterAccountDTO)
+	RegisterAccount(dto RegisterAccountDTO) error
+	SignIn(dto SignInAccountDTO) (domain.AccountToken, error)
 }
 
-type ControllerImpl struct {
+type controllerImpl struct {
 	app.CommandBus
+	*validator.Validate
+	domain.AccountRepository
+	domain.AuthService
+	domain.SocialService
 }
 
-func (c *ControllerImpl) RegisterAccount(dto RegisterAccountDTO) {
-	err := validateDto(dto)
-	if err != nil {
+func NewAccountController(bus app.CommandBus, validator *validator.Validate,
+	repository domain.AccountRepository, authService domain.AuthService, socialService domain.SocialService) Controller {
+	return &controllerImpl{bus, validator, repository, authService, socialService}
+}
 
+func (c *controllerImpl) RegisterAccount(dto RegisterAccountDTO) (err error) {
+	err = c.Validate.Struct(dto)
+	if err != nil {
+		//TODO bad request
+		return
 	}
-	c.CommandBus.Execute(app.RegisterAccountCommand{
+	return c.CommandBus.Execute(app.RegisterAccountCommand{
+		Token: dto.Token,
 		Name: dto.Name,
+		Provider: domain.AuthProvider(dto.Provider),
 	})
 }
 
-func validateDto(dto RegisterAccountDTO) error {
-	return nil
+
+func (c *controllerImpl) SignIn(dto SignInAccountDTO) (token domain.AccountToken, err error) {
+	err = c.Validate.Struct(dto)
+	if err != nil {
+		//TODO bad request
+		return
+	}
+
+	 user, err := c.SocialService.GetUser(context.Background(), domain.AuthProvider(dto.Provider), dto.Token)
+	 if err != nil {
+		 log.WithError(err).Errorf("Can not fetch %s user", dto.Provider)
+		 return
+	 }
+
+	account, _ := c.AccountRepository.FindByProviderAndSocialID(context.Background(), user.AuthProvider(), user.ID())
+	if account == nil {
+		err = errors.New("not found account")
+		log.Error("Can not found account")
+		return
+	}
+
+	token = c.AuthService.GetToken(account)
+	return
 }
