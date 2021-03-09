@@ -96,9 +96,7 @@ func (a *accountImpl) Data() AccountData {
 
 	//deep copy
 	if data.DeletedAt != nil {
-		deleteAt := new(time.Time)
-		*deleteAt = *data.DeletedAt
-		data.DeletedAt = deleteAt
+		data.DeletedAt = pointer.Time(*data.DeletedAt)
 	}
 
 	return data
