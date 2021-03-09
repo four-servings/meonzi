@@ -1,6 +1,8 @@
 package schema
 
 import (
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema"
 	"strings"
 	"time"
 
@@ -84,4 +86,10 @@ func (Account) Indexes() []ent.Index {
 // Edges of the Account.
 func (Account) Edges() []ent.Edge {
 	return nil
+}
+
+func (Account) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.Annotation{Table: "account"},
+	}
 }

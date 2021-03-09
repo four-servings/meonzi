@@ -3,13 +3,14 @@
 package migrate
 
 import (
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/schema/field"
 )
 
 var (
-	// AccountsColumns holds the columns for the "accounts" table.
-	AccountsColumns = []*schema.Column{
+	// AccountColumns holds the columns for the "account" table.
+	AccountColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "social_type", Type: field.TypeUint8},
 		{Name: "social_id", Type: field.TypeString, Size: 30},
@@ -18,30 +19,33 @@ var (
 		{Name: "update_at", Type: field.TypeTime},
 		{Name: "delete_at", Type: field.TypeTime, Nullable: true},
 	}
-	// AccountsTable holds the schema information for the "accounts" table.
-	AccountsTable = &schema.Table{
-		Name:        "accounts",
-		Columns:     AccountsColumns,
-		PrimaryKey:  []*schema.Column{AccountsColumns[0]},
+	// AccountTable holds the schema information for the "account" table.
+	AccountTable = &schema.Table{
+		Name:        "account",
+		Columns:     AccountColumns,
+		PrimaryKey:  []*schema.Column{AccountColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{},
 		Indexes: []*schema.Index{
 			{
 				Name:    "account_social_type_social_id",
 				Unique:  true,
-				Columns: []*schema.Column{AccountsColumns[1], AccountsColumns[2]},
+				Columns: []*schema.Column{AccountColumns[1], AccountColumns[2]},
 			},
 			{
 				Name:    "account_delete_at",
 				Unique:  false,
-				Columns: []*schema.Column{AccountsColumns[6]},
+				Columns: []*schema.Column{AccountColumns[6]},
 			},
 		},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		AccountsTable,
+		AccountTable,
 	}
 )
 
 func init() {
+	AccountTable.Annotation = &entsql.Annotation{
+		Table: "account",
+	}
 }

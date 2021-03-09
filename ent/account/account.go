@@ -25,7 +25,7 @@ const (
 	FieldDeleteAt = "delete_at"
 
 	// Table holds the table name of the account in the database.
-	Table = "accounts"
+	Table = "account"
 )
 
 // Columns holds all SQL columns for account fields.
