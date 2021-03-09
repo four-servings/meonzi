@@ -77,7 +77,7 @@ func (b *busImpl) RegistryHandler(targetType interface{}, handler interface{}) e
 		return errors.New("handler call return must be error")
 	}
 
-	b.set(typ, func(ctx context.Context, value interface{}) error {
+	b.set(typ, func(ctx context.Context, value interface{}) (err error) {
 		in := make([]reflect.Value, inCount)
 
 		switch inCount {
@@ -90,10 +90,9 @@ func (b *busImpl) RegistryHandler(targetType interface{}, handler interface{}) e
 
 		out := action.Call(in)
 		if outCount > 0 {
-			return out[0].Interface().(error)
-		} else {
-			return nil
+			err, _ = out[0].Interface().(error)
 		}
+		return
 	})
 	return nil
 }
