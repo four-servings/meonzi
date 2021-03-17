@@ -1,11 +1,13 @@
 package app
 
-import "github/four-servings/meonzi/local"
+import (
+	"github/four-servings/meonzi/pipe"
+)
 
 type EventPublisher interface {
-	local.PubSub
+	pipe.PubSub
 }
 
 func NewEventPublisher() EventPublisher {
-	return local.NewPubSub()
+	return pipe.NewPubSub()
 }

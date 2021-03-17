@@ -1,4 +1,4 @@
-package local
+package pipe
 
 import (
 	"context"
@@ -13,7 +13,52 @@ var (
 	errorType   = reflect.TypeOf(new(error)).Elem()
 )
 
-type BusHandlerFunc func(ctx context.Context, value interface{}) error
+type ExecuteError interface {
+	Error() error
+}
+
+type executeErrorImpl struct {
+	err error
+}
+
+func (e *executeErrorImpl) Error() error {
+	return e.err
+}
+
+func newExecuteError(err error) ExecuteError {
+	return &executeErrorImpl{err}
+}
+
+type ExecuteResult interface {
+	ExecuteError
+	Result(dst interface{}) ExecuteError
+}
+
+type executeResultImpl struct {
+	ExecuteError
+	value interface{}
+}
+
+func (e *executeResultImpl) Result(dst interface{}) ExecuteError {
+	destination := reflect.ValueOf(dst)
+	source := reflect.ValueOf(e.value)
+
+	if reflect.New(source.Type()).Type() != destination.Type() {
+		return newExecuteError(errors.New("destination type not match to source type"))
+	}
+
+	destination.Elem().Set(source)
+	return e.ExecuteError
+}
+
+func newExecuteResult(value interface{}, err error) ExecuteResult {
+	return &executeResultImpl{
+		ExecuteError: newExecuteError(err),
+		value:        value,
+	}
+}
+
+type BusHandlerFunc func(ctx context.Context, value interface{}) (interface{}, error)
 
 type BusHandler interface {
 	Wrap() BusHandlerFunc
@@ -22,8 +67,8 @@ type BusHandler interface {
 type Bus interface {
 	RegistryStrictHandler(targetType interface{}, handler BusHandler) error
 	RegistryHandler(targetType interface{}, handler interface{}) error
-	Execute(value interface{}) error
-	ExecuteContext(ctx context.Context, value interface{}) error
+	Execute(value interface{}) ExecuteResult
+	ExecuteContext(ctx context.Context, value interface{}) ExecuteResult
 }
 
 type busImpl struct {
@@ -71,13 +116,16 @@ func (b *busImpl) RegistryHandler(targetType interface{}, handler interface{}) e
 		return errors.New("")
 	}
 
-	if outCount > 1 {
+	if outCount > 2 {
 		return errors.New("handler call returns count overflow")
+	} else if outCount == 2 && !actionType.Out(1).Implements(errorType) {
+		//TODO error message
+		return errors.New("")
 	} else if outCount == 1 && !actionType.Out(0).Implements(errorType) {
 		return errors.New("handler call return must be error")
 	}
 
-	b.set(typ, func(ctx context.Context, value interface{}) (err error) {
+	b.set(typ, func(ctx context.Context, value interface{}) (ret interface{}, err error) {
 		in := make([]reflect.Value, inCount)
 
 		switch inCount {
@@ -89,7 +137,11 @@ func (b *busImpl) RegistryHandler(targetType interface{}, handler interface{}) e
 		}
 
 		out := action.Call(in)
-		if outCount > 0 {
+		switch outCount {
+		case 2:
+			ret = out[0].Interface()
+			err, _ = out[1].Interface().(error)
+		case 1:
 			err, _ = out[0].Interface().(error)
 		}
 		return
@@ -107,11 +159,11 @@ func (b *busImpl) RegistryStrictHandler(targetType interface{}, handler BusHandl
 	return nil
 }
 
-func (b *busImpl) Execute(value interface{}) error {
+func (b *busImpl) Execute(value interface{}) ExecuteResult {
 	return b.ExecuteContext(context.Background(), value)
 }
 
-func (b *busImpl) ExecuteContext(ctx context.Context, value interface{}) error {
+func (b *busImpl) ExecuteContext(ctx context.Context, value interface{}) ExecuteResult {
 	c := ctx
 	if b.timeout != nil {
 		var cancel context.CancelFunc
@@ -122,9 +174,9 @@ func (b *busImpl) ExecuteContext(ctx context.Context, value interface{}) error {
 	typ := reflect.TypeOf(value)
 	handle, ok := b.get(typ)
 	if !ok {
-		return errors.New("handler not exists")
+		return newExecuteResult(nil, errors.New("handler not exists"))
 	}
-	return handle(c, value)
+	return newExecuteResult(handle(c, value))
 }
 
 // critical section method

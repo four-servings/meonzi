@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"github/four-servings/meonzi/account/domain"
-	"github/four-servings/meonzi/local"
+	"github/four-servings/meonzi/pipe"
 	"time"
 
 	"golang.org/x/sync/errgroup"
@@ -15,7 +15,7 @@ import (
 
 type (
 	CommandBus interface {
-		local.Bus
+		pipe.Bus
 	}
 
 	commandHandler struct {
@@ -26,7 +26,7 @@ type (
 
 func NewCommandBus(accountRepo domain.AccountRepository, socialService domain.SocialService, timeout time.Duration) (bus CommandBus) {
 	handler := commandHandler{accountRepo, socialService}
-	bus = local.NewBusWithTimeout(timeout)
+	bus = pipe.NewBusWithTimeout(timeout)
 
 	g, _ := errgroup.WithContext(context.Background())
 	g.Go(func() error {
