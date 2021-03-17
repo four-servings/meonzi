@@ -1,89 +1,127 @@
 package domain
 
-import "time"
+import (
+	"context"
+	"github/four-servings/meonzi/util/pointer"
+	"time"
 
-type (
-	//Account account interface
-	Account interface {
-		ID() string
-		Name() string
-		LastAccessedAt() time.Time
-		CreatedAt() time.Time
-		UpdatedAt() time.Time
-		DeletedAt() *time.Time
-	}
-
-	// AccountImplement account model
-	AccountImplement struct {
-		id             string
-		name           string
-		lastAccessedAt time.Time
-		createdAt      time.Time
-		updatedAt      time.Time
-		deletedAt      *time.Time
-	}
-
-	// AnemicAccount anemic account model
-	AnemicAccount struct {
-		ID             string
-		Name           string
-		LastAccessedAt time.Time
-		CreatedAt      time.Time
-		UpdatedAt      time.Time
-		DeletedAt      *time.Time
-	}
-
-	// AccountRepository account repository
-	AccountRepository interface {
-		Save(account Account)
-		FindNewID() string
-		FindByID(id string) Account
-	}
+	"github.com/google/uuid"
 )
 
-// NewAccount create account instance
-func NewAccount(id, name string) Account {
-	now := time.Now()
-	return &AccountImplement{id, name, now, now, now, nil}
+// NewAccount create new account object
+func NewAccount(options NewAccountOptions) Account {
+	return &accountImpl{
+		AccountData: AccountData{
+			ID:           options.ID,
+			Name:         options.Name,
+			AuthProvider: options.AuthProvider,
+			SocialID:     options.SocialID,
+			CreatedAt:    time.Now(),
+			UpdatedAt:    time.Now(),
+			DeletedAt:    nil,
+		},
+	}
 }
 
-// ID account id
-func (account *AccountImplement) ID() string {
-	return account.id
+// ReconstituteAccount reconstitute account object
+func ReconstituteAccount(options ReconstituteAccountOptions) Account {
+	return &accountImpl{
+		AccountData: AccountData{
+			ID:           options.ID,
+			Name:         options.Name,
+			AuthProvider: options.AuthProvider,
+			SocialID:     options.SocialID,
+			CreatedAt:    options.CreatedAt,
+			UpdatedAt:    options.UpdatedAt,
+			DeletedAt:    options.DeletedAt,
+		},
+	}
 }
 
-// Name account name
-func (account *AccountImplement) Name() string {
-	return account.name
+// NewAccountOptions account option for create new account
+type NewAccountOptions struct {
+	ID           uuid.UUID
+	Name         string
+	AuthProvider AuthProvider
+	SocialID     string
 }
 
-// LastAccessedAt account last access time
-func (account *AccountImplement) LastAccessedAt() time.Time {
-	return account.lastAccessedAt
+// ReconstituteAccountOptions reconstitute option for reconstitute account
+type ReconstituteAccountOptions struct {
+	ID           uuid.UUID
+	Name         string
+	AuthProvider AuthProvider
+	SocialID     string
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+	DeletedAt    *time.Time
 }
 
-// CreatedAt account created time
-func (account *AccountImplement) CreatedAt() time.Time {
-	return account.createdAt
+type AccountData struct {
+	ID           uuid.UUID
+	Name         string
+	AuthProvider AuthProvider
+	SocialID     string
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+	DeletedAt    *time.Time
 }
 
-// UpdatedAt account last updated time
-func (account *AccountImplement) UpdatedAt() time.Time {
-	return account.updatedAt
+// Account account domain object interface
+type Account interface {
+	Events() []interface{}
+	Apply(interface{})
+	Deregister()
+	Data() AccountData
 }
 
-// DeletedAt account deleted time
-func (account *AccountImplement) DeletedAt() *time.Time {
-	return account.deletedAt
+// Deregister deregister account
+func (a *accountImpl) Deregister() {
+	a.DeletedAt = pointer.Time(time.Now())
 }
 
-// ToRichModel create rich account model from anemic
-func (anemic *AnemicAccount) ToRichModel() Account {
-	id := anemic.ID
-	name := anemic.Name
-	lastAccessedAt := anemic.LastAccessedAt
-	createdAt := anemic.CreatedAt
-	updatedAt := anemic.UpdatedAt
-	deletedAt := anemic.DeletedAt
-	return &AccountImplement{id, name, lastAccessedAt, createdAt, updatedAt, deletedAt}
+// Events get applied account events
+func (a *accountImpl) Events() (events []interface{}) {
+	events = append(events, a.events...)
+	return
+}
+
+// Apply apply event to account
+func (a *accountImpl) Apply(event interface{}) {
+	a.events = append(a.events, event)
+}
+
+func (a *accountImpl) Data() AccountData {
+	data := a.AccountData
+
+	//deep copy
+	if data.DeletedAt != nil {
+		data.DeletedAt = pointer.Time(*data.DeletedAt)
+	}
+
+	return data
+}
+
+const (
+	// KakaoServiceProviderKey key for AuthProvider value
+	KakaoServiceProviderKey = AuthProvider("KAKAO")
+
+	// GoogleServiceProviderKey key for AuthProvider value
+	GoogleServiceProviderKey = AuthProvider("GOOGLE")
+)
+
+type accountImpl struct {
+	AccountData
+	events       []interface{}
+}
+
+// AuthProvider third party service provider
+type AuthProvider string
+
+// AccountRepository account repository
+type AccountRepository interface {
+	Save(ctx context.Context, account Account) (Account, error)
+	FindByID(ctx context.Context, id uuid.UUID) (Account, error)
+	FindNewID(ctx context.Context) (uuid.UUID, error)
+	FindByProviderAndSocialID(ctx context.Context, provider AuthProvider, socialID string) (Account, error)
 }

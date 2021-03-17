@@ -1,57 +1,121 @@
 package infra
 
 import (
-	"github/four-servings/meonzi/account/domain"
-
+	"context"
+	"errors"
 	"github.com/google/uuid"
-	"gorm.io/gorm"
+	log "github.com/sirupsen/logrus"
+	"github/four-servings/meonzi/account/domain"
+	"github/four-servings/meonzi/ent"
+	"github/four-servings/meonzi/ent/account"
+	"github/four-servings/meonzi/ent/schema"
+	"github/four-servings/meonzi/util/arr"
 )
 
-type accountRepositoryImplement struct {
-	db *gorm.DB
+type repo struct {
+	cli *ent.AccountClient
 }
 
-// NewRepository create repository instance
-func NewRepository(db *gorm.DB) domain.AccountRepository {
-	err := db.AutoMigrate(&Account{})
+
+func NewAccountRepository(cli *ent.AccountClient) domain.AccountRepository {
+	return &repo{cli}
+}
+
+func (r *repo) FindNewID(ctx context.Context) (newId uuid.UUID, err error) {
+	id := uuid.New()
+	exists, _ := r.cli.Get(ctx, id)
+	if exists != nil {
+		log.Error("account find new id exception")
+		err = errors.New("account find new id exception")
+		return
+	}
+	newId = id
+	return
+}
+
+func (r *repo) Save(ctx context.Context, account domain.Account) (saved domain.Account, err error) {
+	data := account.Data()
+	entity, _ := r.cli.Get(ctx, data.ID)
+	var save func(context.Context) (*ent.Account, error)
+	if entity != nil {
+		save = entity.Update().
+			SetName(data.Name).
+			SetNillableDeleteAt(data.DeletedAt).Save
+	} else {
+		save = r.cli.Create().
+			SetID(data.ID).
+			SetSocialType(convertAuthProviderToSocialType(data.AuthProvider)).
+			SetSocialID(data.SocialID).
+			SetName(data.Name).Save
+	}
+
+	entity, err = save(ctx)
 	if err != nil {
-		panic(err)
+		log.WithError(err).Error("account save exception")
+		return
 	}
-	return &accountRepositoryImplement{db}
+	saved = convertEntityToDomain(entity)
+	return
 }
 
-// Save insert or update account date
-func (r *accountRepositoryImplement) Save(account domain.Account) {
-	if err := r.db.Save(EntityFromModel(account)).Error; err != nil {
-		panic(err)
-	}
-}
-
-// FindNewID find new id
-func (r *accountRepositoryImplement) FindNewID() string {
-	id, err := uuid.NewUUID()
+func (r *repo) FindByID(ctx context.Context, id uuid.UUID) (res domain.Account, err error) {
+	acc, err := r.cli.Get(ctx, id)
 	if err != nil {
-		panic(err)
+		log.WithError(err).Error("account find by id exception")
+		return
 	}
 
-	result := r.db.Where(&Account{ID: id.String()}).First(&Account{})
-	if result.Error != nil && result.Error.Error() != "record not found" {
-		panic(result.Error)
-	}
-
-	if result.RowsAffected != 0 {
-		return r.FindNewID()
-	}
-
-	return id.String()
+	res = convertEntityToDomain(acc)
+	return
 }
 
-// FindByID find account by id
-func (r *accountRepositoryImplement) FindByID(id string) domain.Account {
-	account := Account{}
-	result := r.db.Where(&Account{ID: id}).First(&account)
-	if result.Error != nil {
-		panic(result.Error)
+func (r *repo) FindByProviderAndSocialID(ctx context.Context, provider domain.AuthProvider, socialID string) (res domain.Account, err error) {
+	acc, err := r.cli.Query().
+		Where(account.And(
+			account.SocialType(convertAuthProviderToSocialType(provider)),
+			account.SocialID(socialID),
+			)).First(ctx)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"args": arr.Flatten(provider, socialID),
+		}).WithError(err).Error("account get by social exception")
+		return
 	}
-	return ModelFromEntity(account)
+
+	res = convertEntityToDomain(acc)
+	return
+}
+
+func convertAuthProviderToSocialType(provider domain.AuthProvider) schema.SocialType {
+	switch provider {
+	case domain.KakaoServiceProviderKey:
+		return schema.SocialTypeKakao
+	case domain.GoogleServiceProviderKey:
+		return schema.SocialTypeGoogle
+	default:
+		return schema.SocialTypeUnknown
+	}
+}
+
+func convertEntityToDomain(from *ent.Account) domain.Account {
+	return domain.ReconstituteAccount(domain.ReconstituteAccountOptions{
+		ID:           from.ID,
+		Name:         from.Name,
+		AuthProvider: convertSocialTypeToAuthProvider(from.SocialType),
+		SocialID:     from.SocialID,
+		CreatedAt:    from.CreateAt,
+		UpdatedAt:    from.UpdateAt,
+		DeletedAt:    from.DeleteAt,
+	})
+}
+
+func convertSocialTypeToAuthProvider(socialType schema.SocialType) domain.AuthProvider {
+	switch socialType {
+	case schema.SocialTypeKakao:
+		return domain.KakaoServiceProviderKey
+	case schema.SocialTypeGoogle:
+		return domain.GoogleServiceProviderKey
+	default:
+		return "-"
+	}
 }
